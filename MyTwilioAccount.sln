@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyTwilioAccount", "MyTwilioAccount\MyTwilioAccount.csproj", "{6AAE52D9-7291-48EA-91A2-B0303BBBF866}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6AAE52D9-7291-48EA-91A2-B0303BBBF866}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AAE52D9-7291-48EA-91A2-B0303BBBF866}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AAE52D9-7291-48EA-91A2-B0303BBBF866}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AAE52D9-7291-48EA-91A2-B0303BBBF866}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
