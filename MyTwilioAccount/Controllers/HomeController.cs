@@ -11,89 +11,151 @@ namespace MyTwilioAccount.Controllers
 {
     public class HomeController : TwilioController //Controller
     {
-        // GET: Home
-        [HttpPost]
-        public ActionResult Index(Twilio.Mvc.VoiceRequest request)
+        #region[Fields]
+        private List<object> _myVoices;
+        private List<string> _myTexts;
+        #endregion
+
+        #region[properties]
+        private object myVoice { get;  set; }
+        private string myText { get; set; }
+
+        private List<object> myVoices
         {
-            //return View();
-            return Incomming(request);
+            get
+            {
+                return this._myVoices ?? (this._myVoices = this.VoiceLanguages());
+            }
+        }
+        private List<string> myTexts
+        {
+            get
+            {
+                return this._myTexts ?? (this._myTexts = this.TextLanguages());
+            }
         }
 
-        private object RetrieveVoiceLanguage(Twilio.Mvc.VoiceRequest request)
+        private List<object> VoiceLanguages()
         {
-            var voice_NO = new { voice = "alice", language = "nb-NO" };
-            var voice_DK = new { voice = "alice", language = "da-DK" };
-            var voice_SE = new { voice = "alice", language = "sv-SE" };
-            var voice_EN = new { voice = "alice", language = "en-GB" };
+            List<object> _mylist = new List<object>();
+            _mylist.Add(new { voice = "alice", language = "nb-NO" });//0
+            _mylist.Add(new { voice = "alice", language = "da-DK" });//1
+            _mylist.Add(new { voice = "alice", language = "sv-SE" });//2
+            _mylist.Add(new { voice = "alice", language = "en-GB" });//3
 
-            var myvoice = voice_EN;
+            return _mylist;
+        }
+
+        private List<string> TextLanguages()
+        {
+            var string_NO = " Hei! Dette er en melding fra DiabetesGuard.";
+            var string_DK = " Hei! Dette er en besked fra DiabetesGuard.";
+            var string_SE = " Hej! Detta är en meddelande från DiabetesGuard.";
+            var string_GB = " Hello! This is e message from DiabetesGuard.";
+
+            List<string> _mylist = new List<string>();
+
+            _mylist.Add(string_NO);//0
+            _mylist.Add(string_DK);//1
+            _mylist.Add(string_SE);//2
+            _mylist.Add(string_GB);//3
+        
+            return _mylist;
+        }
+        #endregion
+
+        #region[Methods]
+
+
+        private void InitVoiceLanguage(Twilio.Mvc.VoiceRequest request)
+        {
+            myVoice = myVoices[3];
+
+            if (request.FromCountry == null)
+                return;
 
             var country = request.FromCountry.ToString();
             switch (country.ToUpper())
             {
                 case ("NO"):
-                    myvoice = voice_NO;
+                    myVoice = myVoices[0];
                     break;
                 case ("DK"):
-                    myvoice = voice_DK;
+                    myVoice = myVoices[1];
                     break;
                 case ("SE"):
-                    myvoice = voice_SE;
+                    myVoice = myVoices[2];
                     break;
                 case ("GB"):
-                    myvoice = voice_EN;
-                    break;
                 default:
-                    myvoice = voice_EN;
+                    myVoice = myVoices[3];
                     break;
             }
-
-            return myvoice;
         }
-        private string RetrieveTextLanguage(Twilio.Mvc.VoiceRequest request)
+
+        private void InitTextLanguage(Twilio.Mvc.VoiceRequest request)
         {
-            var string_NO = " Hei {0}.  Dette er en melding fra DiabetesGuard og fra SmartCare. Ha en fin dag!";
-            var string_DK = " Hei {0}. Dette er en besked fra DiabetesGuard og fra SmartCare. Hav en fin dag!";
-            var string_SE = " Hej {0}.  Detta är en meddelande från DiabetesGuard och från SmartCare. Ha en fin dag!";
-            var string_EN = " Hello {0}. This is e message from DiabetesGuard and SmartCare. Have a pleasant day!";
-            var mystring = "";
+            myText = myTexts[3];
+
+            if (request.FromCountry == null)
+                return;
 
             var country = request.FromCountry.ToString();
             switch (country.ToUpper())
             {
                 case ("NO"):
-                    mystring = string_NO;
+                    myText = myTexts[0];
                     break;
                 case ("DK"):
-                    mystring = string_DK;
+                    myText = myTexts[1];
                     break;
                 case ("SE"):
-                    mystring = string_SE;
+                    myText = myTexts[2];
                     break;
                 case ("GB"):
-                    mystring = string_EN;
-                    break;
                 default:
-                    mystring = "I do not reqognize where you are calling from!";
+                    myText = myTexts[3];
                     break;
             }
-
-            return mystring;
-
         }
+
+
+        public ActionResult ViewHome()
+        {
+            return View();
+        }
+        #endregion
 
         [HttpPost]
         public ActionResult Incomming (Twilio.Mvc.VoiceRequest request)
         {
             var response = new TwilioResponse();
 
-            var myvoice = this.RetrieveVoiceLanguage(request);
-            var mystring = this.RetrieveTextLanguage(request);
+            this.InitVoiceLanguage(request);
+            this.InitTextLanguage(request);
 
-            var callerName = request.CallerName;
-            response.Say(string.Format(mystring, callerName), myvoice)
+            myVoice = new { voice = "alice", language = "en-GB" };
+            myText = "Hi!  this is an automatic message from my twilio test environment.";        
+                
+            response.Say(myText, myVoice)
+                .Pause(1);
+            
+
+            response.Say("Please press a number between 1 and 3", myVoice).
+                BeginGather(new { numDigit = "1", method = "GET", action = "http://mytwilioaccount.azurewebsites.net/home/test", timeout = 5})
+                .EndGather();
+
+            return TwiML(response);
+        }
+
+        [HttpGet]
+        public ActionResult test(string digits)
+        {
+            var response = new TwilioResponse();
+
+            response.Say(string.Format("Than you! Your choice was {0}. Have a nice day.", digits), myVoice)
                 .Pause(2)
-              .Hangup ();
+                .Hangup();
 
             return TwiML(response);
         }
